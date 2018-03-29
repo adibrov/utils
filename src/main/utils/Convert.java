@@ -62,6 +62,48 @@ public class Convert {
         return returnArray;
     }
 
+    public static short[] tiffToShortArray(String pPathToTiff) {
+        short[] returnArray = null;
+
+        try {
+            Img<UnsignedShortType> img = ImagePlusAdapter.wrapImgPlus(new Opener().openImage(pPathToTiff));
+
+            RandomAccess<UnsignedShortType> ra = img.randomAccess();
+
+            int ndim = img.numDimensions();
+            if (ndim != 3) {
+                throw new IllegalArgumentException("don't know what to do with it yet... ndim != 3");
+            }
+
+            int x = (int) img.dimension(0);
+            int y = (int) img.dimension(1);
+            int z = (int) img.dimension(2);
+
+            System.out.println("---> tiffToArray: converting a tiff with dims: " + x + " " + y + " " + z);
+
+            returnArray = new short[x * y * z];
+
+
+            for (int i = 0; i < x; i++) {
+                for (int j = 0; j < y; j++) {
+                    for (int k = 0; k < z; k++) {
+                        int pos[] = {i, j, k};
+                        ra.setPosition(pos);
+                        returnArray[(i + x * j + x * y * k)] = (short)ra.get().getInteger();
+
+                    }
+                }
+            }
+
+            System.out.println("---> tiffToArray: conversion complete");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return returnArray;
+    }
+
+
     public static byte[] tiffToByteArrayLE(String pPathToTiff) {
         byte[] returnArray = null;
 
@@ -167,8 +209,7 @@ public class Convert {
         return img;
     }
 
-    public static void convertTIFF8bitToRaw(String pPathToTIFF,
-                                            String pName) {
+    public static void convertTIFF8bitToRaw(String pPathToTIFF, Endianness pEndianness) {
 
         Img<UnsignedByteType> img =
                 null;
@@ -178,7 +219,12 @@ public class Convert {
         try {
 
             img = ImagePlusAdapter.wrapImgPlus(new Opener().openImage(pPathToTIFF));
-            String name = pName + "_" + img.dimension(0) + "x" + img.dimension(1) + "x" + img.dimension(2) + ".raw";
+            String name = pPathToTIFF.substring(0, pPathToTIFF.length() - 4) + "_" + img.dimension(0) + "x" + img
+                    .dimension(1) +
+                    "x" + img
+                    .dimension(2) +
+                    "" +
+                    ".raw";
             FileOutputStream f = new FileOutputStream(name);
             RandomAccess<UnsignedByteType> ra = img.randomAccess();
 
@@ -204,29 +250,10 @@ public class Convert {
 
             byte[] arr = new byte[x * y * z];
 
-            int mask1 = 0B1111111100000000;
-            int mask2 = 0B0000000011111111;
-
-            for (int i = 0; i < x; i++) {
-                for (int j = 0; j < y; j++) {
-                    for (int k = 0; k < z; k++) {
-                        int pos[] =
-                                {i, j, k};
-                        ra.setPosition(pos);
-                        int curr = ra.get().getInteger();
-                        // System.out.println("integer is: " + curr);
-                        arr[(i + x * j
-                                + x * y
-                                * k)] =
-                                (byte) ra.get().getInteger();
-
-                        // System.out.println("byte1 is: " +arr[2 * (i + x * j + x * y *
-                        // k)]);
-                        // System.out.println("byte2 is: " +arr[2 * (i + x * j + x * y * k)
-                        // + 1]);
-                    }
-                }
-            }
+            if (pEndianness == Endianness.LE)
+                arr = tiffToByteArrayBE(pPathToTIFF);
+            else
+                arr = tiffToByteArrayLE(pPathToTIFF);
 
             f.write(arr);
             f.close();
@@ -241,7 +268,7 @@ public class Convert {
         }
     }
 
-    public static void convertTIFF16bitToRaw(String pPathToTIFF) {
+    public static void convertTIFF16bitToRaw(String pPathToTIFF, Endianness pEndianness) {
 
         Img<UnsignedShortType> img =
                 null;
@@ -260,7 +287,13 @@ public class Convert {
             FileOutputStream f = new FileOutputStream(name);
             RandomAccess<UnsignedShortType> ra = img.randomAccess();
 
-            byte[] arr = tiffToByteArrayBE(pPathToTIFF);
+
+            byte[] arr = new byte[5];
+
+            if (pEndianness == Endianness.LE)
+                arr = tiffToByteArrayLE(pPathToTIFF);
+            else
+                arr = tiffToByteArrayBE(pPathToTIFF);
 
 
             f.write(arr);
