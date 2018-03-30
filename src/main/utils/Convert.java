@@ -18,43 +18,54 @@ import java.io.FileOutputStream;
  */
 public class Convert {
 
-    public static byte[] tiffToByteArrayBE(String pPathToTiff) {
+    public static byte[] tiff16bitToByteArray(String pPathToTiff, Endianness pEndianness) {
         byte[] returnArray = null;
 
         try {
-            Img<UnsignedShortType> img = ImagePlusAdapter.wrapImgPlus(new Opener().openImage(pPathToTiff));
+            System.out.println(String.format("[Utils]: --- tiff16bitToByteArray --- "));
+            double t1 = System.nanoTime();
 
+            Img<UnsignedShortType> img = ImagePlusAdapter.wrapImgPlus(new Opener().openImage(pPathToTiff));
             RandomAccess<UnsignedShortType> ra = img.randomAccess();
 
             int ndim = img.numDimensions();
-            if (ndim != 3) {
-                throw new IllegalArgumentException("don't know what to do with it yet... ndim != 3");
+            System.out.println(String.format("[Utils]: Loaded a .tif file with %d dimensions.", ndim));
+            if (ndim < 2 || ndim > 3) {
+                throw new IllegalArgumentException(String.format("Only 2d and 3d images are supported. Given ndim: " + "%d", ndim));
             }
 
             int x = (int) img.dimension(0);
             int y = (int) img.dimension(1);
             int z = (int) img.dimension(2);
 
-            System.out.println("---> tiffToArray: converting a tiff with dims: " + x + " " + y + " " + z);
+            System.out.println(String.format("[Utils]: %dx%dx%d ", x, y, z));
 
             returnArray = new byte[2 * x * y * z];
 
             int mask1 = 0B1111111100000000;
             int mask2 = 0B0000000011111111;
 
+            int d1 = 1;
+            int d2 = 0;
+
+            if (pEndianness == Endianness.BE) {
+                d1 = 0;
+                d2 = 1;
+            }
+
             for (int i = 0; i < x; i++) {
                 for (int j = 0; j < y; j++) {
                     for (int k = 0; k < z; k++) {
                         int pos[] = {i, j, k};
                         ra.setPosition(pos);
-                        returnArray[2 * (i + x * j + x * y * k)] = (byte) ((mask1 & (ra.get().getInteger())) >>> 8);
-                        returnArray[2 * (i + x * j + x * y * k)
-                                + 1] = (byte) ((mask2 & ra.get().getInteger()));
+
+                        returnArray[2 * (i + x * j + x * y * k) + d1] = (byte) ((mask1 & (ra.get().getInteger())) >>> 8);
+                        returnArray[2 * (i + x * j + x * y * k) + d2] = (byte) ((mask2 & ra.get().getInteger()));
                     }
                 }
             }
-
-            System.out.println("---> tiffToArray: conversion complete");
+            double t2 = System.nanoTime();
+            System.out.println(String.format("[Utils]: conversion complete in %.2f ms.", (t2 - t1) * 1e-6));
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -62,24 +73,27 @@ public class Convert {
         return returnArray;
     }
 
-    public static short[] tiffToShortArray(String pPathToTiff) {
+    public static short[] tiff16bitToShortArray(String pPathToTiff) {
         short[] returnArray = null;
 
         try {
-            Img<UnsignedShortType> img = ImagePlusAdapter.wrapImgPlus(new Opener().openImage(pPathToTiff));
+            System.out.println(String.format("[Utils]: --- tiff16bitToShortArray --- "));
+            double t1 = System.nanoTime();
 
+            Img<UnsignedShortType> img = ImagePlusAdapter.wrapImgPlus(new Opener().openImage(pPathToTiff));
             RandomAccess<UnsignedShortType> ra = img.randomAccess();
 
             int ndim = img.numDimensions();
-            if (ndim != 3) {
-                throw new IllegalArgumentException("don't know what to do with it yet... ndim != 3");
+            System.out.println(String.format("[Utils]: Loaded a .tif file with %d dimensions.", ndim));
+            if (ndim < 2 || ndim > 3) {
+                throw new IllegalArgumentException(String.format("Only 2d and 3d images are supported. Given ndim: " + "%d", ndim));
             }
 
             int x = (int) img.dimension(0);
             int y = (int) img.dimension(1);
             int z = (int) img.dimension(2);
 
-            System.out.println("---> tiffToArray: converting a tiff with dims: " + x + " " + y + " " + z);
+            System.out.println(String.format("[Utils]: %dx%dx%d ", x, y, z));
 
             returnArray = new short[x * y * z];
 
@@ -89,13 +103,13 @@ public class Convert {
                     for (int k = 0; k < z; k++) {
                         int pos[] = {i, j, k};
                         ra.setPosition(pos);
-                        returnArray[(i + x * j + x * y * k)] = (short)ra.get().getInteger();
-
+                        returnArray[(i + x * j + x * y * k)] = (short) ra.get().getInteger();
                     }
                 }
             }
 
-            System.out.println("---> tiffToArray: conversion complete");
+            double t2 = System.nanoTime();
+            System.out.println(String.format("[Utils]: conversion complete in %.2f ms.", (t2 - t1) * 1e-6));
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -104,74 +118,29 @@ public class Convert {
     }
 
 
-    public static byte[] tiffToByteArrayLE(String pPathToTiff) {
+    public static byte[] tiff8bitToByteArray(String pPathToTiff) {
         byte[] returnArray = null;
 
         try {
+            System.out.println(String.format("[Utils]: --- tiff8bitToByteArray --- "));
+            double t1 = System.nanoTime();
 
-
-            Img<UnsignedShortType> img = ImagePlusAdapter.wrapImgPlus(new Opener().openImage(pPathToTiff));
-
-            RandomAccess<UnsignedShortType> ra = img.randomAccess();
-
-            int ndim = img.numDimensions();
-            if (ndim != 3) {
-                throw new IllegalArgumentException("don't know what to do with it yet... ndim != 3");
-            }
-
-            int x = (int) img.dimension(0);
-            int y = (int) img.dimension(1);
-            int z = (int) img.dimension(2);
-
-            System.out.println("---> tiffToArray: converting a tiff with dims: " + x + " " + y + " " + z);
-
-            returnArray = new byte[2 * x * y * z];
-
-            int mask1 = 0B1111111100000000;
-            int mask2 = 0B0000000011111111;
-
-            for (int i = 0; i < x; i++) {
-                for (int j = 0; j < y; j++) {
-                    for (int k = 0; k < z; k++) {
-                        int pos[] = {i, j, k};
-                        ra.setPosition(pos);
-                        returnArray[2 * (i + x * j + x * y * k) + 1] = (byte) ((mask1 & (ra.get().getInteger())) >>> 8);
-                        returnArray[2 * (i + x * j + x * y * k)
-                                ] = (byte) ((mask2 & ra.get().getInteger()));
-                    }
-                }
-            }
-
-            System.out.println("---> tiffToArray: conversion complete");
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return returnArray;
-    }
-
-
-    public static byte[] tiffToByteArray8bit(String pPathToTiff) {
-        byte[] returnArray = null;
-
-        try {
             Img<UnsignedByteType> img = ImagePlusAdapter.wrapImgPlus(new Opener().openImage(pPathToTiff));
-
             RandomAccess<UnsignedByteType> ra = img.randomAccess();
 
             int ndim = img.numDimensions();
-            if (ndim != 3) {
-                throw new IllegalArgumentException("don't know what to do with it yet... ndim != 3");
+            System.out.println(String.format("[Utils]: Loaded a .tif file with %d dimensions.", ndim));
+            if (ndim < 2 || ndim > 3) {
+                throw new IllegalArgumentException(String.format("Only 2d and 3d images are supported. Given ndim: " + "%d", ndim));
             }
 
             int x = (int) img.dimension(0);
             int y = (int) img.dimension(1);
             int z = (int) img.dimension(2);
 
-            System.out.println("---> tiffToArray: converting a tiff with dims: " + x + " " + y + " " + z);
+            System.out.println(String.format("[Utils]: %dx%dx%d ", x, y, z));
 
             returnArray = new byte[x * y * z];
-
 
             for (int i = 0; i < x; i++) {
                 for (int j = 0; j < y; j++) {
@@ -183,7 +152,8 @@ public class Convert {
                 }
             }
 
-            System.out.println("---> tiffToArray: conversion complete");
+            double t2 = System.nanoTime();
+            System.out.println(String.format("[Utils]: conversion complete in %.2f ms.", (t2 - t1) * 1e-6));
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -191,11 +161,11 @@ public class Convert {
         return returnArray;
     }
 
-    public static ArrayImg wrapIntoImgLib2ArrayImg(byte[] pDataToWrap, int pDimX, int pDimY, int pDimZ) {
+    public static ArrayImg wrapByteArrayIntoImgLib2ArrayUnsignedByteImg(byte[] pDataToWrap, int pDimX, int pDimY, int pDimZ) {
         try {
-            if (pDataToWrap.length != 2 * pDimX * pDimY * pDimZ) {
-                throw new Exception("Target image dimensions do not match to the array size. pDimX*pDimY*pDimZ = " +
-                        pDimX * pDimY * pDimZ + "; pDataToWrap.length = " + pDataToWrap.length + ". Returning null.");
+            if (pDataToWrap.length != pDimX * pDimY * pDimZ) {
+                throw new Exception("Target image dimensions do not match to the array size. pDimX*pDimY*pDimZ = " + pDimX * pDimY * pDimZ + "; " +
+                        "pDataToWrap.length = " + pDataToWrap.length + ". Returning null.");
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -209,22 +179,15 @@ public class Convert {
         return img;
     }
 
-    public static void convertTIFF8bitToRaw(String pPathToTIFF, Endianness pEndianness) {
+    public static void convertTIFF8bitToRaw(String pPathToTIFF) {
 
-        Img<UnsignedByteType> img =
-                null;
-//        ImgOpener iop = new ImgOpener();
-
+        Img<UnsignedByteType> img = null;
 
         try {
 
             img = ImagePlusAdapter.wrapImgPlus(new Opener().openImage(pPathToTIFF));
-            String name = pPathToTIFF.substring(0, pPathToTIFF.length() - 4) + "_" + img.dimension(0) + "x" + img
-                    .dimension(1) +
-                    "x" + img
-                    .dimension(2) +
-                    "" +
-                    ".raw";
+            String name = pPathToTIFF.substring(0, pPathToTIFF.length() - 4) + "_" + img.dimension(0) + "x" + img.dimension(1) + "x" + img
+                    .dimension(2) + "" + ".raw";
             FileOutputStream f = new FileOutputStream(name);
             RandomAccess<UnsignedByteType> ra = img.randomAccess();
 
@@ -234,26 +197,13 @@ public class Convert {
 
             int x = (int) img.dimension(0);
             int y = (int) img.dimension(1);
-            int z;
-            if (ndim != 3) {
-                z = 1;
-            } else {
-                z = (int) img.dimension(2);
-            }
+            int z = (int) img.dimension(2);
 
 
-            System.out.println("converting a tiff with dims: " + x
-                    + " "
-                    + y
-                    + " "
-                    + z);
+            System.out.println("converting a tiff with dims: " + x + " " + y + " " + z);
 
-            byte[] arr = new byte[x * y * z];
+            byte[] arr = tiff8bitToByteArray(pPathToTIFF);
 
-            if (pEndianness == Endianness.LE)
-                arr = tiffToByteArrayBE(pPathToTIFF);
-            else
-                arr = tiffToByteArrayLE(pPathToTIFF);
 
             f.write(arr);
             f.close();
@@ -262,38 +212,23 @@ public class Convert {
 
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-
-            System.out.println("finally!");
         }
     }
 
     public static void convertTIFF16bitToRaw(String pPathToTIFF, Endianness pEndianness) {
 
-        Img<UnsignedShortType> img =
-                null;
-//        ImgOpener iop = new ImgOpener();
-
+        Img<UnsignedShortType> img = null;
 
         try {
 
             img = ImagePlusAdapter.wrapImgPlus(new Opener().openImage(pPathToTIFF));
-            String name = pPathToTIFF.substring(0, pPathToTIFF.length() - 4) + "_" + img.dimension(0) + "x" + img
-                    .dimension(1) +
-                    "x" + img
-                    .dimension(2) +
-                    "" +
-                    ".raw";
+            String name = pPathToTIFF.substring(0, pPathToTIFF.length() - 4) + "_" + img.dimension(0) + "x" + img.dimension(1) + "x" + img
+                    .dimension(2) + "" + ".raw";
             FileOutputStream f = new FileOutputStream(name);
             RandomAccess<UnsignedShortType> ra = img.randomAccess();
 
 
-            byte[] arr = new byte[5];
-
-            if (pEndianness == Endianness.LE)
-                arr = tiffToByteArrayLE(pPathToTIFF);
-            else
-                arr = tiffToByteArrayBE(pPathToTIFF);
+            byte[] arr = tiff16bitToByteArray(pPathToTIFF, pEndianness);
 
 
             f.write(arr);
@@ -339,18 +274,9 @@ public class Convert {
         return dims;
     }
 
-//    public static void ByteBuffer32to8(ByteBuffer pBuffer32, ByteBuffer pBuffer8, OpenCLEnvironment pOpenCLEnv) {
-//        if (pBuffer32.capacity() % 4 != 0) {
-//            throw new IllegalArgumentException("Size of the input 32-bit buffer is not divisible by 4. That's wrong.");
-//        }
-//        if (pBuffer32.capacity() / 4 != pBuffer8.capacity()) {
-//            throw new IllegalArgumentException("Size of the input 32-bit buffer /4 != size of the 8-bit buffer. Cannot convert32to8.");
-//        }
-//
-//    }
-
     public static void main(String[] args) {
-        tiffToByteArrayLE("resources/img/P5.tif");
+        tiff16bitToByteArray("resources/img/wingCropStack.tif", Endianness.LE);
+        //        convertTIFF16bitToRaw("resources/img/wingCropStack.tif", Endianness.LE);
     }
 
 }
