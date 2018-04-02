@@ -15,6 +15,8 @@ import static utils.Convert.tiff16bitToByteArray;
 public class Tests {
     @Test
     public void tiff16bitToByteArrayTest() {
+        System.out.println("[UtilsTests]: --- tiff16bitToByteArrayTest ---");
+
 
         long[] dims = {100, 100,1};
         int size = 1;
@@ -22,15 +24,13 @@ public class Tests {
             size *= l;
         }
 
-        System.out.println("size: " + size);
+        System.out.println(String.format("[UtilsTests]: Original short array size: %d", size));
+
         short[] shArr = new short[size];
         Random rand = new Random();
         for (int i = 0; i < size; i++) {
-            shArr[i] = (short)rand.nextInt(Short.MAX_VALUE);
-//            shArr[i] = 225;
-//            shArr[i] = 100;
+            shArr[i] = (short)rand.nextInt(2*Short.MAX_VALUE);
         }
-
 
 
         ShortArray lShortArray = new ShortArray(shArr);
@@ -39,21 +39,24 @@ public class Tests {
         img0.setLinkedType(ust);
 
         ImgSaver is = new ImgSaver();
-
+        System.out.println("[UtilsTests]: saving a test .tif image.");
         try {
             is.saveImg("resources/img/testImg.tif", img0);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        byte[] barr = tiff16bitToByteArray("resources/img/testImg.tif", Endianness.LE);
-        System.out.println("[UtilsTests]: --- tiff16bitToByteArrayTest ---");
-        System.out.println("[UtilsTests: Loaded byte array size: " + barr.length);
-        assertTrue(barr.length == 2*shArr.length);
+
+
 
         boolean flag = true;
         int mask1 = 0B1111111100000000;
         int mask2 = 0B0000000011111111;
+
+        System.out.println("[UtilsTests]: Testing little endianness...");
+        byte[] barr = tiff16bitToByteArray("resources/img/testImg.tif", Endianness.LE);
+        System.out.println("[UtilsTests]: Loaded byte array size: " + barr.length);
+        assertTrue(barr.length == 2*shArr.length);
 
         for (int i=0; i<size; i++){
             int v1 = (barr[2*i]&mask2);
@@ -67,6 +70,11 @@ public class Tests {
 
             }
         }
+
+        assertTrue(flag);
+        System.out.println("[UtilsTests]: Success.");
+
+        System.out.println("[UtilsTests]: Testing big endianness...");
 
         barr = tiff16bitToByteArray("resources/img/testImg.tif", Endianness.BE);
         for (int i=0; i<size; i++){
@@ -85,6 +93,7 @@ public class Tests {
 
 
         assertTrue(flag);
+        System.out.println("[UtilsTests]: Success.");
 
 
 
