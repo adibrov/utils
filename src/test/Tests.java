@@ -1,6 +1,9 @@
+import ij.ImagePlus;
+import ij.plugin.Duplicator;
 import io.scif.img.ImgSaver;
 import net.imglib2.img.array.ArrayImg;
 import net.imglib2.img.basictypeaccess.array.ShortArray;
+import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.util.Fraction;
 import org.junit.Test;
@@ -18,7 +21,7 @@ public class Tests {
         System.out.println("[UtilsTests]: --- tiff16bitToByteArrayTest ---");
 
 
-        long[] dims = {100, 100,1};
+        long[] dims = {100, 100, 1};
         int size = 1;
         for (long l : dims) {
             size *= l;
@@ -29,7 +32,7 @@ public class Tests {
         short[] shArr = new short[size];
         Random rand = new Random();
         for (int i = 0; i < size; i++) {
-            shArr[i] = (short)rand.nextInt(2*Short.MAX_VALUE);
+            shArr[i] = (short) rand.nextInt(2 * Short.MAX_VALUE);
         }
 
 
@@ -37,6 +40,9 @@ public class Tests {
         ArrayImg<UnsignedShortType, ShortArray> img0 = new ArrayImg(lShortArray, dims, new Fraction());
         UnsignedShortType ust = new UnsignedShortType(img0);
         img0.setLinkedType(ust);
+
+        ImagePlus wrap = ImageJFunctions.wrap(img0, "");
+        ImagePlus dupl = new Duplicator().run(wrap);
 
         ImgSaver is = new ImgSaver();
         System.out.println("[UtilsTests]: saving a test .tif image.");
@@ -47,8 +53,6 @@ public class Tests {
         }
 
 
-
-
         boolean flag = true;
         int mask1 = 0B1111111100000000;
         int mask2 = 0B0000000011111111;
@@ -56,17 +60,17 @@ public class Tests {
         System.out.println("[UtilsTests]: Testing little endianness...");
         byte[] barr = tiff16bitToByteArray("resources/img/testImg.tif", Endianness.LE);
         System.out.println("[UtilsTests]: Loaded byte array size: " + barr.length);
-        assertTrue(barr.length == 2*shArr.length);
+        assertTrue(barr.length == 2 * shArr.length);
 
-        for (int i=0; i<size; i++){
-            int v1 = (barr[2*i]&mask2);
-            int v2 = (barr[2*i+1] <<8)&mask1;
-            int value =  v1+v2;
+        for (int i = 0; i < size; i++) {
+            int v1 = (barr[2 * i] & mask2);
+            int v2 = (barr[2 * i + 1] << 8) & mask1;
+            int value = v1 + v2;
 
-            if (shArr[i] != (short)value){
-                flag=false;
+            if (shArr[i] != (short) value) {
+                flag = false;
                 System.out.println(String.format("[UtilTests]: Assertion failed: initial value - %d, loaded value - %d (from bytes %d and %d)",
-                        shArr[i], value, barr[2*i], barr[2*i+1] ));
+                        shArr[i], value, barr[2 * i], barr[2 * i + 1]));
 
             }
         }
@@ -77,24 +81,21 @@ public class Tests {
         System.out.println("[UtilsTests]: Testing big endianness...");
 
         barr = tiff16bitToByteArray("resources/img/testImg.tif", Endianness.BE);
-        for (int i=0; i<size; i++){
-            int v1 = (barr[2*i+1]&mask2);
-            int v2 = (barr[2*i] <<8)&mask1;
-            int value =  v1+v2;
+        for (int i = 0; i < size; i++) {
+            int v1 = (barr[2 * i + 1] & mask2);
+            int v2 = (barr[2 * i] << 8) & mask1;
+            int value = v1 + v2;
 
-            if (shArr[i] != (short)value){
-                flag=false;
+            if (shArr[i] != (short) value) {
+                flag = false;
                 System.out.println(String.format("[UtilTests]: Assertion failed: initial value - %d, loaded value - %d (from bytes %d and %d)",
-                        shArr[i], value, barr[2*i], barr[2*i+1] ));
+                        shArr[i], value, barr[2 * i], barr[2 * i + 1]));
 
             }
         }
 
-
-
         assertTrue(flag);
         System.out.println("[UtilsTests]: Success.");
-
 
 
     }
