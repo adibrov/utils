@@ -1,9 +1,7 @@
 package utils;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.util.Scanner;
 
 public class Readers {
     public static String readFile(String fileName) {
@@ -25,6 +23,35 @@ public class Readers {
             System.exit(1);
             return null;
         }
+    }
+
+    public static String readFileAsResourceStream(InputStream pInputStream) {
+
+        if (pInputStream == null) {
+            System.out.println("null!!!!!!!!!");
+        }
+
+        StringBuilder result = new StringBuilder();
+        try {
+            try (Scanner scanner = new Scanner(pInputStream)) {
+
+                while (scanner.hasNextLine()) {
+                    String line = scanner.nextLine();
+                    result.append(line).append("\n");
+                }
+
+                scanner.close();
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result.toString();
     }
 
 //    readFloatBuffer()
