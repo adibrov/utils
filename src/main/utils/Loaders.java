@@ -116,24 +116,23 @@ public class Loaders {
     }
 
 
-    public static ByteBuffer loadNamedUnsignedShortSampleFromDisk(String pTiffFileName, String pResourcesFolderName){
-
-//        String fileName = "P8";
-//        String resImgPath = "resources/img/";
-        File resImgDir = new File(pResourcesFolderName);
-
-        String path = "";
-        for (File f : resImgDir.listFiles()) {
-            if (f.getName().startsWith(pTiffFileName) && f.getName().endsWith(".raw")) {
-                path = pResourcesFolderName + f.getName();
-            }
+    public static ByteBuffer loadNamedUnsignedShortSampleFromDisk(String pPathToFile){
+        System.out.println("[Utils]: --- loading unsigned short sample space from disk ---");
+        System.out.println("[Utils]: parsing dimensions...");
+        String lDirectoryPath = "";
+        String[] lSplitSlash = pPathToFile.split("/");
+        for (int i = 0; i < lSplitSlash.length; i++) {
+            lDirectoryPath += lSplitSlash[i];
         }
 
-        String[] split1 = path.split("_");
+        File resImgDir = new File(lDirectoryPath);
+
+
+        String[] split1 = pPathToFile.split("_");
         String suff1 = split1[split1.length - 1];
-        System.out.println("suff1 is : " + suff1);
+        System.out.println("[Utils]: file name is: " + suff1);
         String[] split2 = suff1.split("\\.");
-        System.out.println("split2 size is: " + split2.length);
+//        System.out.println("split2 size is: " + split2.length);
         String suff2 = split2[split2.length - 2];
 
 //        System.out.println(split1[split1.length - 1]);
@@ -145,8 +144,8 @@ public class Loaders {
 
         int[] dims = {Integer.parseInt(dimsS[0]), Integer.parseInt(dimsS[1]), Integer.parseInt(dimsS[2])};
 
-        System.out.println("Loading named unsigned short with dims: " + dims[0] + "x"+dims[1]+"x"+dims[2]);
+        System.out.println("[Utils]: Loading named unsigned short with dims: " + dims[0] + "x"+dims[1]+"x"+dims[2]);
 
-        return loadUnsignedShortSampleSpaceFromDisk(path, dims[0], dims[1], dims[2]);
+        return loadUnsignedShortSampleSpaceFromDisk(pPathToFile, dims[0], dims[1], dims[2]);
     }
 }
