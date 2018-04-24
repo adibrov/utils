@@ -310,6 +310,42 @@ public class Convert {
         }
     }
 
+    public static void convertTIFF16bitToRawPlanes(String pPathToTIFF, Endianness pEndianness) {
+
+        Img<UnsignedShortType> img = null;
+
+        try {
+            img = ImagePlusAdapter.wrapImgPlus(new Opener().openImage(pPathToTIFF));
+            int sx = (int) img.dimension(0);
+            int sy = (int) img.dimension(1);
+            int sz = (int) img.dimension(2);
+
+            String name = pPathToTIFF.substring(0, pPathToTIFF.length() - 4) + "_" + sx + "x" + sy + "x" + sz + "" + ".raw";
+
+            String lDirName = name.substring(0,name.length() - 4);
+//            System.out.println(lDirName);
+            new File(lDirName).mkdirs();
+
+            byte[] arr = tiff16bitToByteArray(pPathToTIFF, pEndianness);
+
+            for (int i = 0; i < img.dimension(2); i++) {
+                FileOutputStream f = new FileOutputStream(lDirName + "/" + i + ".raw");
+                f.write(arr, 2 * sx * sy * i, 2 * sx * sy);
+                f.close();
+            }
+
+
+            System.out.println("done converting");
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+
+            System.out.println("finally!");
+        }
+    }
+
 
     public static int[] parseDimsFromFileName(String fName, String dName) {
         String path = "";
@@ -403,7 +439,7 @@ public class Convert {
         long l = binary((byte) 7);
         System.out.println(l);
 
-        short[] arr = new short[] {1,2,3,4,5};
+        short[] arr = new short[]{1, 2, 3, 4, 5};
         byte[] barr = shortArrayToByteArray(arr, Endianness.LE);
 
         for (int i = 0; i < barr.length; i++) {
