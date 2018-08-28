@@ -35,6 +35,32 @@ public class Loaders {
         return bb;
     }
 
+    public static ByteBuffer loadUnsignedShortFrameFromDisk(String pPath, int pDimX, int pDimY, int pDimZ, int pZ) {
+        System.out.println("Loading a SampleSpace from file " + pPath);
+        byte[] arr = new byte[pDimX*pDimY*2];
+
+        try (FileInputStream fis = new FileInputStream(pPath); BufferedInputStream bis = new BufferedInputStream(fis)) {
+            long t1 = System.nanoTime();
+            bis.read(arr, 2*pZ*pDimX*pDimY,pDimX*pDimY*2);
+
+            System.out.println(" loading: " + arr[12000] + " " + arr[13000] + " " + arr[20000]);
+
+            //            }
+            long t2 = System.nanoTime();
+            System.out.println("---Buffering: yes. Loaded file " + pPath + " in: " + ((t2 - t1) / 1000000.) + " ms");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+            System.out.println("Success.");
+            System.out.println();
+        }
+        //        return arrInt;
+        ByteBuffer bb = ByteBuffer.wrap(arr);
+        bb.rewind();
+        return bb;
+    }
+
     public static ByteBuffer loadUnsignedByteSampleSpaceFromDisk(String pPath, int pDimX, int pDimY, int pDimZ) {
         System.out.println("Loading a SampleSpace from file " + pPath);
         byte[] arr = new byte[pDimX * pDimY * pDimZ];
@@ -140,5 +166,13 @@ public class Loaders {
 
         int[] dims = {Integer.parseInt(dimsS[0]), Integer.parseInt(dimsS[1]), Integer.parseInt(dimsS[2])};
         return dims;
+    }
+
+    public static void main(String[] args) {
+        try {
+            loadNamedUnsignedShortRawToByteBufferedImage("resources/img/wingCropStack_128x128x16.raw");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
