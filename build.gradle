@@ -42,7 +42,7 @@ sourceSets
 }
 
 group 'smartimg'
-version '0.1.0'
+version '0.1.1'
 
 dependencies {
     // This dependency is exported to consumers, that is to say found on their compile classpath.
@@ -85,7 +85,7 @@ publishing {
         maven(MavenPublication) {
             groupId 'smartimg'
             artifactId 'utils'
-            version '0.1.0'
+            version '0.1.1'
 
             from components.java
         }
