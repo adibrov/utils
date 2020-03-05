@@ -65,4 +65,27 @@ public class ByteBufferedImage {
     public int getBytesPerPixel() {
         return mBytesPerPixel;
     }
+
+    public ByteBufferedImage duplicate(){
+        ByteBuffer newBuffer = ByteBuffer.allocate(this.buffer.capacity());
+
+        newBuffer.rewind();
+        this.buffer.rewind();
+
+        newBuffer.put(buffer);
+        newBuffer.order(buffer.order());
+
+        newBuffer.rewind();
+        this.buffer.rewind();
+
+        ByteBufferedImage newImage = null;
+
+        try {
+            newImage = new ByteBufferedImage(newBuffer, getX(), getY(), getZ(), getBytesPerPixel(), mEndianness);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return newImage;
+    }
 }

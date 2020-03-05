@@ -35,13 +35,13 @@ public class Loaders {
         return bb;
     }
 
-    public static ByteBuffer loadUnsignedShortFrameFromDisk(String pPath, int pDimX, int pDimY, int pDimZ, int pZ) {
+    public static ByteBuffer loadUnsignedShortFrameFromDisk(String pPath, int pDimX, int pDimY, int pZ) {
         System.out.println("Loading a SampleSpace from file " + pPath);
         byte[] arr = new byte[pDimX*pDimY*2];
 
-        try (FileInputStream fis = new FileInputStream(pPath); BufferedInputStream bis = new BufferedInputStream(fis)) {
+        try (FileInputStream fis = new FileInputStream(pPath+"/"+pZ+".raw"); BufferedInputStream bis = new BufferedInputStream(fis)) {
             long t1 = System.nanoTime();
-            bis.read(arr, 2*pZ*pDimX*pDimY,pDimX*pDimY*2);
+            bis.read(arr);
 
             System.out.println(" loading: " + arr[12000] + " " + arr[13000] + " " + arr[20000]);
 

@@ -430,21 +430,23 @@ public class Convert {
 
     public static void main(String[] args) {
         //        tiff16bitToByteArray("resources/img/wingCropStack.tif", Endianness.LE);
-        //        convertTIFF16bitToRaw("resources/img/wingCropStack.tif", Endianness.LE);
+//                convertTIFF16bitToRaw("resources/img/wingCropStack.tif", Endianness.LE);
 
 
-        short sh = bytesToShort(new byte[]{1, 1}, Endianness.LE);
-        System.out.println(sh);
-
-        long l = binary((byte) 7);
-        System.out.println(l);
-
-        short[] arr = new short[]{1, 2, 3, 4, 5};
-        byte[] barr = shortArrayToByteArray(arr, Endianness.LE);
-
-        for (int i = 0; i < barr.length; i++) {
-            System.out.println(barr[i]);
-        }
+//        short sh = bytesToShort(new byte[]{1, 1}, Endianness.LE);
+//        System.out.println(sh);
+//
+//        long l = binary((byte) 7);
+//        System.out.println(l);
+//
+//        short[] arr = new short[]{1, 2, 3, 4, 5};
+//        byte[] barr = shortArrayToByteArray(arr, Endianness.LE);
+//
+//        for (int i = 0; i < barr.length; i++) {
+//            System.out.println(barr[i]);
+//        }
+        String path = "/Users/dibrov/Documents/PhD/software/SmartCluster/resources/img/slice.tif";
+        tiff16bitToByteBufferedImage(path, Endianness.LE);
 
     }
 
