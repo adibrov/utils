@@ -1,6 +1,8 @@
 package utils;
 
 
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
 import java.nio.ByteBuffer;
 
 public class ByteBufferedImage {
@@ -87,5 +89,23 @@ public class ByteBufferedImage {
         }
 
         return newImage;
+    }
+
+    public void loadFromFile(String path){
+        try (FileInputStream fis = new FileInputStream(path); BufferedInputStream bis = new BufferedInputStream(fis)) {
+
+            bis.read(this.buffer.array());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        } finally {
+            System.out.println("Success.");
+        }
+    }
+
+    public static void main(String[] args) {
+        ByteBufferedImage bbi = new ByteBufferedImage(128,128,16,2);
+        bbi.loadFromFile("resources/img/wingCropStack_128x128x16.raw");
     }
 }
